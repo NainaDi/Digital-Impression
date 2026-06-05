@@ -1,0 +1,13 @@
+query ThemeFileGet($themeId: ID!, $filename: String!) {
+  theme(id: $themeId) {
+    id
+    name
+    file(filename: $filename) {
+      filename
+      size
+      checksum
+      contentType
+      body { ... on OnlineStoreThemeFileBodyText { content } }
+    }
+  }
+}

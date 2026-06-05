@@ -1,0 +1,10 @@
+query ShopInfo {
+  shop {
+    id
+    name
+    myshopifyDomain
+    primaryDomain { url host }
+    currencyCode
+    plan { displayName partnerDevelopment }
+  }
+}

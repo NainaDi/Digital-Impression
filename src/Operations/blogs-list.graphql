@@ -1,0 +1,6 @@
+query BlogsList($first: Int!) {
+  blogs(first: $first) {
+    nodes { id title handle updatedAt }
+    pageInfo { hasNextPage endCursor }
+  }
+}

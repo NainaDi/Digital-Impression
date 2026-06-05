@@ -1,0 +1,6 @@
+query ThemesList($first: Int!) {
+  themes(first: $first) {
+    nodes { id name role createdAt updatedAt }
+    pageInfo { hasNextPage endCursor }
+  }
+}

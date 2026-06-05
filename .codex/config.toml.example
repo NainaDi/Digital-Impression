@@ -1,0 +1,8 @@
+[mcp_servers.shopify-middleware]
+command = "node"
+args = ["/absolute/path/to/mcp-shopify-middleware/mcp-server/server.js"]
+
+[mcp_servers.shopify-middleware.env]
+MCP_MIDDLEWARE_BASE_URL = "https://thedigitalimpressions.com/downloads/mcp"
+MCP_SHARED_SECRET = "replace_with_your_shared_secret"
+MCP_HTTP_TIMEOUT_MS = "15000"
