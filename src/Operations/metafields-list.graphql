@@ -1,0 +1,10 @@
+query MetafieldsList($ownerId: ID!, $first: Int!) {
+  node(id: $ownerId) {
+    ... on HasMetafields {
+      metafields(first: $first) {
+        nodes { id namespace key type value updatedAt }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+  }
+}

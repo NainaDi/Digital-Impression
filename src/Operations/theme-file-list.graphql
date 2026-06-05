@@ -1,0 +1,10 @@
+query ThemeFileList($themeId: ID!, $first: Int!) {
+  theme(id: $themeId) {
+    id
+    name
+    files(first: $first) {
+      nodes { filename size checksum contentType updatedAt }
+      pageInfo { hasNextPage endCursor }
+    }
+  }
+}

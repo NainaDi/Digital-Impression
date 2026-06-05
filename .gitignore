@@ -1,0 +1,20 @@
+# Runtime configuration and secrets
+.env
+config/app.php
+
+# Dependencies
+node_modules/
+vendor/
+
+# Logs and runtime files
+storage/logs/*.log
+!storage/logs/.gitkeep
+*.log
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# Build artifacts
+dist/

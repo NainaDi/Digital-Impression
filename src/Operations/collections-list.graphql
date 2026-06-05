@@ -1,0 +1,12 @@
+query CollectionsList($first: Int!, $query: String) {
+  collections(first: $first, query: $query) {
+    nodes {
+      id
+      title
+      handle
+      updatedAt
+      productsCount { count }
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}

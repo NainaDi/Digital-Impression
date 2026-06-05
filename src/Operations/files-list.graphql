@@ -1,0 +1,14 @@
+query FilesList($first: Int!, $query: String) {
+  files(first: $first, query: $query) {
+    nodes {
+      id
+      alt
+      createdAt
+      fileStatus
+      preview { image { url altText width height } }
+      ... on MediaImage { image { url altText width height } }
+      ... on GenericFile { url mimeType originalFileSize }
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}
