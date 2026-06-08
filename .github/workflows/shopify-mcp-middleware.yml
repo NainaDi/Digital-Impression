@@ -1,0 +1,197 @@
+name: Shopify MCP Middleware
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - work
+    paths:
+      - '.github/workflows/shopify-mcp-middleware.yml'
+      - '.htaccess'
+      - 'config/**'
+      - 'mcp-server/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'src/**'
+      - 'DEPLOYMENT.md'
+      - 'README.md'
+
+jobs:
+  validate-package:
+    name: Validate Shopify middleware and build deployment artifact
+    runs-on: ubuntu-latest
+    env:
+      SHOPIFY_SHOP: codex-mcp-2.myshopify.com
+      SHOPIFY_ADMIN_API_VERSION: '2025-10'
+      MCP_MIDDLEWARE_BASE_URL: https://thedigitalimpressions.com/downloads/mcp
+      MCP_HTTP_TIMEOUT_MS: '15000'
+      SHOPIFY_ADMIN_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ADMIN_ACCESS_TOKEN }}
+      MCP_SHARED_SECRET: ${{ secrets.MCP_SHARED_SECRET }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      SSH_TARGET_DIR: ${{ secrets.SSH_TARGET_DIR }}
+      PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: curl
+          coverage: none
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify required GitHub Actions secrets are present
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          if [[ -z "${SHOPIFY_ADMIN_ACCESS_TOKEN}" ]]; then
+            echo "SHOPIFY_ADMIN_ACCESS_TOKEN GitHub Actions secret is missing."
+            missing=1
+          fi
+          if [[ -z "${MCP_SHARED_SECRET}" ]]; then
+            echo "MCP_SHARED_SECRET GitHub Actions secret is missing."
+            missing=1
+          fi
+          exit "${missing}"
+
+      - name: Validate PHP syntax
+        run: ./scripts/validate-php.sh
+
+      - name: Install MCP bridge dependencies
+        run: npm install
+        working-directory: mcp-server
+
+      - name: Run MCP bridge smoke test
+        run: npm --prefix mcp-server run smoke
+
+      - name: Verify Shopify Admin API connection
+        shell: bash
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          status=$(curl --silent --show-error \
+            --output "${response_file}" \
+            --write-out '%{http_code}' \
+            --request POST "https://${SHOPIFY_SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json" \
+            --header 'Content-Type: application/json' \
+            --header "X-Shopify-Access-Token: ${SHOPIFY_ADMIN_ACCESS_TOKEN}" \
+            --data '{"query":"query ShopifyConnectionCheck { shop { name myshopifyDomain } }"}')
+
+          if [[ "${status}" != "200" ]]; then
+            echo "Shopify Admin API check failed with HTTP ${status}."
+            python3 - "${response_file}" <<'PY'
+          import json, sys
+          text = open(sys.argv[1], encoding='utf-8', errors='replace').read()
+          try:
+              payload = json.loads(text)
+              print(json.dumps(payload, indent=2)[:1000])
+          except Exception:
+              print(text[:1000])
+          PY
+            exit 1
+          fi
+
+          python3 - "${response_file}" <<'PY'
+          import json, sys
+          payload = json.load(open(sys.argv[1], encoding='utf-8'))
+          shop = payload.get('data', {}).get('shop')
+          if not shop:
+              print(json.dumps(payload, indent=2)[:1000])
+              raise SystemExit('Shopify Admin API response did not include shop data.')
+          print('Shopify Admin API connection verified for ' + shop.get('myshopifyDomain', '[unknown-domain]'))
+          PY
+
+      - name: Build deployment package with production config from secrets
+        shell: bash
+        env:
+          INCLUDE_PRODUCTION_CONFIG: '1'
+        run: ./scripts/build-deployment-package.sh
+
+      - name: Verify deployment package contains production config
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -l dist/shopify-mcp-middleware-deploy.zip | grep -q 'config/app.php'
+          unzip -l dist/shopify-mcp-middleware-deploy.zip | grep -q 'public/index.php'
+          unzip -l dist/shopify-mcp-middleware-deploy.zip | grep -q 'src/Services/ShopifyAdminClient.php'
+
+      - name: Upload manual deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: shopify-mcp-middleware-deploy
+          path: |
+            dist/shopify-mcp-middleware-deploy.zip
+            dist/shopify-mcp-middleware-deploy.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Verify SSH deployment secrets are present
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in SSH_HOST SSH_USERNAME SSH_PASSWORD SSH_TARGET_DIR PUBLIC_BASE_URL; do
+            if [[ -z "${!name}" ]]; then
+              echo "${name} GitHub Actions secret is missing."
+              missing=1
+            fi
+          done
+          exit "${missing}"
+
+      - name: Install SSH password deployment tools
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Deploy middleware package over SSH
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          package="dist/shopify-mcp-middleware-deploy.tar.gz"
+          remote_package="/tmp/shopify-mcp-middleware-deploy-${GITHUB_RUN_ID}.tar.gz"
+          ssh_opts=(-o StrictHostKeyChecking=accept-new -o ConnectTimeout=20)
+
+          sshpass -p "${SSH_PASSWORD}" ssh "${ssh_opts[@]}" "${SSH_USERNAME}@${SSH_HOST}" \
+            "mkdir -p '${SSH_TARGET_DIR}' && chmod 755 '${SSH_TARGET_DIR}'"
+
+          sshpass -p "${SSH_PASSWORD}" scp "${ssh_opts[@]}" "${package}" \
+            "${SSH_USERNAME}@${SSH_HOST}:${remote_package}"
+
+          sshpass -p "${SSH_PASSWORD}" ssh "${ssh_opts[@]}" "${SSH_USERNAME}@${SSH_HOST}" \
+            "tar -xzf '${remote_package}' -C '${SSH_TARGET_DIR}' && rm -f '${remote_package}' && mkdir -p '${SSH_TARGET_DIR}/storage/logs' && chmod 755 '${SSH_TARGET_DIR}/storage' '${SSH_TARGET_DIR}/storage/logs'"
+
+      - name: Verify deployed middleware health URL
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_url="${PUBLIC_BASE_URL}"
+          curl --fail --show-error --silent "${base_url%/}/health"
+
+      - name: Verify deployed Shopify middleware connection
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_url="${PUBLIC_BASE_URL}"
+          curl --fail --show-error --silent \
+            --request POST "${base_url%/}/api/shop/info" \
+            --header "Authorization: Bearer ${MCP_SHARED_SECRET}" \
+            --header 'Content-Type: application/json' \
+            --data '{}'

@@ -1,0 +1,15 @@
+query ArticlesList($first: Int!, $query: String) {
+  articles(first: $first, query: $query) {
+    nodes {
+      id
+      title
+      handle
+      author { name }
+      blog { id title handle }
+      publishedAt
+      updatedAt
+      summary
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}
