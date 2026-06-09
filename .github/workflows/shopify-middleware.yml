@@ -22,8 +22,8 @@ jobs:
     name: Validate Shopify middleware and build deployment artifact
     runs-on: ubuntu-latest
     env:
-      SHOPIFY_SHOP: codex-mcp-2.myshopify.com
-      SHOPIFY_ADMIN_API_VERSION: '2025-10'
+      SHOPIFY_SHOP: ${{ secrets.SHOPIFY_SHOP || 'codex-mcp-2.myshopify.com' }}
+      SHOPIFY_ADMIN_API_VERSION: ${{ secrets.SHOPIFY_ADMIN_API_VERSION || '2025-10' }}
       MCP_MIDDLEWARE_BASE_URL: https://thedigitalimpressions.com/downloads/mcp
       MCP_HTTP_TIMEOUT_MS: '15000'
       SHOPIFY_ADMIN_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ADMIN_ACCESS_TOKEN }}
@@ -75,13 +75,21 @@ jobs:
         run: |
           set -euo pipefail
           response_file="$(mktemp)"
-          status=$(curl --silent --show-error \
+          request_file="$(mktemp)"
+          trap 'rm -f "${response_file}" "${request_file}"' EXIT
+
+          cat > "${request_file}" <<'JSON'
+          {"query":"query ShopifyConnectionCheck { shop { name myshopifyDomain } }"}
+          JSON
+
+          status=$(curl --http1.1 --silent --show-error \
             --output "${response_file}" \
             --write-out '%{http_code}' \
-            --request POST "https://${SHOPIFY_SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json" \
+            --request POST \
+            --url "https://${SHOPIFY_SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json" \
             --header 'Content-Type: application/json' \
             --header "X-Shopify-Access-Token: ${SHOPIFY_ADMIN_ACCESS_TOKEN}" \
-            --data '{"query":"query ShopifyConnectionCheck { shop { name myshopifyDomain } }"}')
+            --data-binary "@${request_file}")
 
           if [[ "${status}" != "200" ]]; then
             echo "Shopify Admin API check failed with HTTP ${status}."
