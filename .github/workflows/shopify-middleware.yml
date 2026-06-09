@@ -78,22 +78,36 @@ jobs:
           request_file="$(mktemp)"
           trap 'rm -f "${response_file}" "${request_file}"' EXIT
 
+          shop_domain="${SHOPIFY_SHOP#https://}"
+          shop_domain="${shop_domain#http://}"
+          shop_domain="${shop_domain%%/*}"
+          shop_domain="${shop_domain%/}"
+          api_version="${SHOPIFY_ADMIN_API_VERSION//[[:space:]]/}"
+          api_version="${api_version#/}"
+          api_version="${api_version%/}"
+          shopify_graphql_url="https://${shop_domain}/admin/api/${api_version}/graphql.json"
+
           python3 - <<'PY' > "${request_file}"
           import json
           print(json.dumps({
               "query": "query ShopifyConnectionCheck { shop { name myshopifyDomain } }",
-          }))
+          }, separators=(",", ":")))
           PY
+
+          echo "Shopify Admin GraphQL URL: ${shopify_graphql_url}"
+          echo "Shopify Admin GraphQL payload:"
+          cat "${request_file}"
+          printf '\n'
+          echo "Shopify Admin GraphQL curl command: curl --silent --show-error --output \"${response_file}\" --write-out '%{http_code}' --request POST --url \"${shopify_graphql_url}\" --header 'Content-Type: application/json' --header 'X-Shopify-Access-Token: ***' --data @${request_file}"
 
           status=$(curl --silent --show-error \
             --output "${response_file}" \
             --write-out '%{http_code}' \
             --request POST \
-            --url "https://${SHOPIFY_SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json" \
-            --header 'Accept: application/json' \
+            --url "${shopify_graphql_url}" \
             --header 'Content-Type: application/json' \
             --header "X-Shopify-Access-Token: ${SHOPIFY_ADMIN_ACCESS_TOKEN}" \
-            --data-binary "@${request_file}")
+            --data "@${request_file}")
 
           if [[ "${status}" != "200" ]]; then
             echo "Shopify Admin API check failed with HTTP ${status}."
