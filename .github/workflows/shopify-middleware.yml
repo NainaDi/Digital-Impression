@@ -117,18 +117,21 @@ jobs:
           text = open(sys.argv[1], encoding='utf-8', errors='replace').read()
           if not text:
               print('No response body was returned by Shopify.')
-              raise SystemExit(0)
-          try:
-              payload = json.loads(text)
-              print(json.dumps(payload, indent=2)[:1000])
-          except Exception:
-              print(text[:1000])
+          else:
+              try:
+                  payload = json.loads(text)
+                  print(json.dumps(payload, indent=2)[:1000])
+              except Exception:
+                  print(text[:1000])
           PY
           elif [[ "${status}" != "200" ]]; then
             echo "::warning::Shopify Admin API check failed with HTTP ${status}. Continuing deployment package build."
             python3 - "${response_file}" <<'PY'
           import json, sys
           text = open(sys.argv[1], encoding='utf-8', errors='replace').read()
+          if not text:
+              print('No response body was returned by Shopify.')
+              raise SystemExit(0)
           try:
               payload = json.loads(text)
               print(json.dumps(payload, indent=2)[:1000])
@@ -141,18 +144,19 @@ jobs:
           text = open(sys.argv[1], encoding='utf-8', errors='replace').read()
           try:
               payload = json.loads(text)
+              shop = payload.get('data', {}).get('shop')
+              if shop:
+                  print('Shopify Admin API connection verified for ' + shop.get('myshopifyDomain', '[unknown-domain]'))
+              else:
+                  print(json.dumps(payload, indent=2)[:1000])
+                  print('::warning::Shopify Admin API response did not include shop data. Continuing deployment package build.')
           except Exception:
               print(text[:1000])
               print('::warning::Shopify Admin API response was not valid JSON. Continuing deployment package build.')
-              raise SystemExit(0)
-          shop = payload.get('data', {}).get('shop')
-          if not shop:
-              print(json.dumps(payload, indent=2)[:1000])
-              print('::warning::Shopify Admin API response did not include shop data. Continuing deployment package build.')
-              raise SystemExit(0)
-          print('Shopify Admin API connection verified for ' + shop.get('myshopifyDomain', '[unknown-domain]'))
           PY
           fi
+
+          true
 
       - name: Build deployment package with production config from secrets
         shell: bash
