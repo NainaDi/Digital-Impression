@@ -22,8 +22,8 @@ jobs:
     name: Validate Shopify middleware and build deployment artifact
     runs-on: ubuntu-latest
     env:
-      SHOPIFY_SHOP: codex-mcp-2.myshopify.com
-      SHOPIFY_ADMIN_API_VERSION: '2025-10'
+      SHOPIFY_SHOP: ${{ secrets.SHOPIFY_SHOP || 'codex-mcp-2.myshopify.com' }}
+      SHOPIFY_ADMIN_API_VERSION: ${{ secrets.SHOPIFY_ADMIN_API_VERSION || '2025-10' }}
       MCP_MIDDLEWARE_BASE_URL: https://thedigitalimpressions.com/downloads/mcp
       MCP_HTTP_TIMEOUT_MS: '15000'
       SHOPIFY_ADMIN_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ADMIN_ACCESS_TOKEN }}
@@ -75,13 +75,39 @@ jobs:
         run: |
           set -euo pipefail
           response_file="$(mktemp)"
+          request_file="$(mktemp)"
+          trap 'rm -f "${response_file}" "${request_file}"' EXIT
+
+          shop_domain="${SHOPIFY_SHOP#https://}"
+          shop_domain="${shop_domain#http://}"
+          shop_domain="${shop_domain%%/*}"
+          shop_domain="${shop_domain%/}"
+          api_version="${SHOPIFY_ADMIN_API_VERSION//[[:space:]]/}"
+          api_version="${api_version#/}"
+          api_version="${api_version%/}"
+          shopify_graphql_url="https://${shop_domain}/admin/api/${api_version}/graphql.json"
+
+          python3 - <<'PY' > "${request_file}"
+          import json
+          print(json.dumps({
+              "query": "query ShopifyConnectionCheck { shop { name myshopifyDomain } }",
+          }, separators=(",", ":")))
+          PY
+
+          echo "Shopify Admin GraphQL URL: ${shopify_graphql_url}"
+          echo "Shopify Admin GraphQL payload:"
+          cat "${request_file}"
+          printf '\n'
+          echo "Shopify Admin GraphQL curl command: curl --silent --show-error --output \"${response_file}\" --write-out '%{http_code}' --request POST --url \"${shopify_graphql_url}\" --header 'Content-Type: application/json' --header 'X-Shopify-Access-Token: ***' --data @${request_file}"
+
           status=$(curl --silent --show-error \
             --output "${response_file}" \
             --write-out '%{http_code}' \
-            --request POST "https://${SHOPIFY_SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json" \
+            --request POST \
+            --url "${shopify_graphql_url}" \
             --header 'Content-Type: application/json' \
             --header "X-Shopify-Access-Token: ${SHOPIFY_ADMIN_ACCESS_TOKEN}" \
-            --data '{"query":"query ShopifyConnectionCheck { shop { name myshopifyDomain } }"}')
+            --data "@${request_file}")
 
           if [[ "${status}" != "200" ]]; then
             echo "Shopify Admin API check failed with HTTP ${status}."
