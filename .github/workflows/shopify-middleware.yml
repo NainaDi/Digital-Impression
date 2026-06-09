@@ -129,6 +129,9 @@ jobs:
             python3 - "${response_file}" <<'PY'
           import json, sys
           text = open(sys.argv[1], encoding='utf-8', errors='replace').read()
+          if not text:
+              print('No response body was returned by Shopify.')
+              raise SystemExit(0)
           try:
               payload = json.loads(text)
               print(json.dumps(payload, indent=2)[:1000])
