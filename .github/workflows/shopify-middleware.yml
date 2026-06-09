@@ -78,15 +78,19 @@ jobs:
           request_file="$(mktemp)"
           trap 'rm -f "${response_file}" "${request_file}"' EXIT
 
-          cat > "${request_file}" <<'JSON'
-          {"query":"query ShopifyConnectionCheck { shop { name myshopifyDomain } }"}
-          JSON
+          python3 - <<'PY' > "${request_file}"
+          import json
+          print(json.dumps({
+              "query": "query ShopifyConnectionCheck { shop { name myshopifyDomain } }",
+          }))
+          PY
 
-          status=$(curl --http1.1 --silent --show-error \
+          status=$(curl --silent --show-error \
             --output "${response_file}" \
             --write-out '%{http_code}' \
             --request POST \
             --url "https://${SHOPIFY_SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json" \
+            --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             --header "X-Shopify-Access-Token: ${SHOPIFY_ADMIN_ACCESS_TOKEN}" \
             --data-binary "@${request_file}")
