@@ -1,3 +1,4 @@
+# PHP middleware mode. Do not commit real secrets to this file.
 [mcp_servers.shopify-middleware]
 command = "node"
 args = ["/absolute/path/to/mcp-shopify-middleware/mcp-server/server.js"]
@@ -6,3 +7,15 @@ args = ["/absolute/path/to/mcp-shopify-middleware/mcp-server/server.js"]
 MCP_MIDDLEWARE_BASE_URL = "https://thedigitalimpressions.com/downloads/mcp"
 MCP_SHARED_SECRET = "replace_with_your_shared_secret"
 MCP_HTTP_TIMEOUT_MS = "15000"
+
+# Direct Shopify mode for local/Codex use when the PHP middleware is not deployed.
+# Omit MCP_MIDDLEWARE_BASE_URL and MCP_SHARED_SECRET to use this mode.
+#[mcp_servers.shopify-direct]
+#command = "node"
+#args = ["/absolute/path/to/mcp-shopify-middleware/mcp-server/server.js"]
+#
+#[mcp_servers.shopify-direct.env]
+#SHOPIFY_SHOP = "codex-mcp-2.myshopify.com"
+#SHOPIFY_ADMIN_API_VERSION = "2025-10"
+#SHOPIFY_ADMIN_ACCESS_TOKEN = "replace_with_your_admin_token"
+#MCP_HTTP_TIMEOUT_MS = "15000"
