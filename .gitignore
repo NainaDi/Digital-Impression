@@ -1,6 +1,7 @@
 # Runtime configuration and secrets
 .env
 config/app.php
+.codex/config.toml
 
 # Dependencies
 node_modules/

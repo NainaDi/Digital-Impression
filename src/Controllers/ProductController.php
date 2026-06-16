@@ -27,6 +27,25 @@ final class ProductController
     }
 
     /** @param array<string, mixed> $input @return array<string, mixed> */
+    public function createBasic(array $input): array
+    {
+        $product = [
+            'title' => $this->validator->string($input, 'title', 255),
+        ];
+
+        foreach (['descriptionHtml', 'vendor', 'productType', 'status'] as $field) {
+            $value = $this->validator->string($input, $field, $field === 'descriptionHtml' ? 50000 : 255, false);
+            if ($value !== null) {
+                $product[$field] = $value;
+            }
+        }
+
+        return $this->shopify->runStoredOperation('product-create-basic', [
+            'product' => $product,
+        ]);
+    }
+
+    /** @param array<string, mixed> $input @return array<string, mixed> */
     public function get(array $input): array
     {
         return $this->shopify->runStoredOperation('product-get', [
