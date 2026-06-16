@@ -1,0 +1,768 @@
+{% liquid
+  assign featured_product = section.settings.featured_product
+  assign product_description = section.settings.product_description
+%}
+
+<section class="marketplace-trust marketplace-trust--{{ section.id }} color-{{ section.settings.color_scheme }}">
+  <div class="marketplace-trust__inner page-width">
+    {% if section.settings.trust_heading != blank %}
+      <div class="marketplace-trust__trust-heading-wrap">
+        <p class="marketplace-trust__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        <h2 class="marketplace-trust__trust-heading">{{ section.settings.trust_heading | escape }}</h2>
+      </div>
+    {% endif %}
+
+    <div class="marketplace-trust__icons" aria-label="{{ section.settings.trust_heading | escape }}">
+      <div class="marketplace-trust__icon-card">
+        {% if section.settings.trust_icon_1 != blank %}
+          {{ section.settings.trust_icon_1 | image_url: width: 96 | image_tag: class: 'marketplace-trust__icon-image', loading: 'lazy' }}
+        {% else %}
+          <span class="marketplace-trust__icon-fallback" aria-hidden="true">10+</span>
+        {% endif %}
+        <span>{{ section.settings.trust_text_1 | escape }}</span>
+      </div>
+
+      <div class="marketplace-trust__icon-card">
+        {% if section.settings.trust_icon_2 != blank %}
+          {{ section.settings.trust_icon_2 | image_url: width: 96 | image_tag: class: 'marketplace-trust__icon-image', loading: 'lazy' }}
+        {% else %}
+          <span class="marketplace-trust__icon-fallback" aria-hidden="true">✓</span>
+        {% endif %}
+        <span>{{ section.settings.trust_text_2 | escape }}</span>
+      </div>
+
+      <div class="marketplace-trust__icon-card">
+        {% if section.settings.trust_icon_3 != blank %}
+          {{ section.settings.trust_icon_3 | image_url: width: 96 | image_tag: class: 'marketplace-trust__icon-image', loading: 'lazy' }}
+        {% else %}
+          <span class="marketplace-trust__icon-fallback" aria-hidden="true">↺</span>
+        {% endif %}
+        <span>{{ section.settings.trust_text_3 | escape }}</span>
+      </div>
+
+      <div class="marketplace-trust__icon-card">
+        {% if section.settings.trust_icon_4 != blank %}
+          {{ section.settings.trust_icon_4 | image_url: width: 96 | image_tag: class: 'marketplace-trust__icon-image', loading: 'lazy' }}
+        {% else %}
+          <span class="marketplace-trust__icon-fallback" aria-hidden="true">◆</span>
+        {% endif %}
+        <span>{{ section.settings.trust_text_4 | escape }}</span>
+      </div>
+
+      <div class="marketplace-trust__icon-card">
+        {% if section.settings.trust_icon_5 != blank %}
+          {{ section.settings.trust_icon_5 | image_url: width: 96 | image_tag: class: 'marketplace-trust__icon-image', loading: 'lazy' }}
+        {% else %}
+          <span class="marketplace-trust__icon-fallback" aria-hidden="true">↗</span>
+        {% endif %}
+        <span>{{ section.settings.trust_text_5 | escape }}</span>
+      </div>
+
+      <div class="marketplace-trust__icon-card">
+        {% if section.settings.trust_icon_6 != blank %}
+          {{ section.settings.trust_icon_6 | image_url: width: 96 | image_tag: class: 'marketplace-trust__icon-image', loading: 'lazy' }}
+        {% else %}
+          <span class="marketplace-trust__icon-fallback" aria-hidden="true">24</span>
+        {% endif %}
+        <span>{{ section.settings.trust_text_6 | escape }}</span>
+      </div>
+    </div>
+
+    <div class="marketplace-trust__marketplaces">
+      <div class="marketplace-trust__marketplace-heading">
+        <h2>{{ section.settings.marketplace_heading | escape }}</h2>
+        {% if section.settings.marketplace_subtitle != blank %}
+          <p>{{ section.settings.marketplace_subtitle | escape }}</p>
+        {% endif %}
+      </div>
+
+      <div class="marketplace-trust__logo-grid">
+        <a class="marketplace-trust__logo-card" href="{{ section.settings.marketplace_link_1 | default: '#' }}" aria-label="{{ section.settings.marketplace_name_1 | escape }}">
+          {% if section.settings.marketplace_logo_1 != blank %}
+            {{ section.settings.marketplace_logo_1 | image_url: width: 360 | image_tag: class: 'marketplace-trust__logo-image', loading: 'lazy' }}
+          {% else %}
+            <span>{{ section.settings.marketplace_name_1 | escape }}</span>
+          {% endif %}
+        </a>
+
+        <a class="marketplace-trust__logo-card" href="{{ section.settings.marketplace_link_2 | default: '#' }}" aria-label="{{ section.settings.marketplace_name_2 | escape }}">
+          {% if section.settings.marketplace_logo_2 != blank %}
+            {{ section.settings.marketplace_logo_2 | image_url: width: 360 | image_tag: class: 'marketplace-trust__logo-image', loading: 'lazy' }}
+          {% else %}
+            <span>{{ section.settings.marketplace_name_2 | escape }}</span>
+          {% endif %}
+        </a>
+
+        <a class="marketplace-trust__logo-card" href="{{ section.settings.marketplace_link_3 | default: '#' }}" aria-label="{{ section.settings.marketplace_name_3 | escape }}">
+          {% if section.settings.marketplace_logo_3 != blank %}
+            {{ section.settings.marketplace_logo_3 | image_url: width: 360 | image_tag: class: 'marketplace-trust__logo-image', loading: 'lazy' }}
+          {% else %}
+            <span>{{ section.settings.marketplace_name_3 | escape }}</span>
+          {% endif %}
+        </a>
+
+        <a class="marketplace-trust__logo-card" href="{{ section.settings.marketplace_link_4 | default: '#' }}" aria-label="{{ section.settings.marketplace_name_4 | escape }}">
+          {% if section.settings.marketplace_logo_4 != blank %}
+            {{ section.settings.marketplace_logo_4 | image_url: width: 360 | image_tag: class: 'marketplace-trust__logo-image', loading: 'lazy' }}
+          {% else %}
+            <span>{{ section.settings.marketplace_name_4 | escape }}</span>
+          {% endif %}
+        </a>
+      </div>
+    </div>
+
+    <div class="marketplace-trust__product-showcase">
+      <div class="marketplace-trust__product-copy">
+        {% if section.settings.product_eyebrow != blank %}
+          <p class="marketplace-trust__eyebrow">{{ section.settings.product_eyebrow | escape }}</p>
+        {% endif %}
+        {% if section.settings.product_heading != blank %}
+          <h2>{{ section.settings.product_heading | escape }}</h2>
+        {% endif %}
+        {% if section.settings.product_subtitle != blank %}
+          <div class="marketplace-trust__product-subtitle rte">{{ section.settings.product_subtitle }}</div>
+        {% endif %}
+      </div>
+
+      <a class="marketplace-trust__product-card" href="{% if featured_product != blank %}{{ featured_product.url }}{% else %}{{ section.settings.product_button_link | default: '#' }}{% endif %}">
+        <div class="marketplace-trust__product-media">
+          {% if featured_product != blank and featured_product.featured_image != blank %}
+            {{ featured_product.featured_image | image_url: width: 1100 | image_tag: class: 'marketplace-trust__product-image', loading: 'lazy', widths: '420, 640, 860, 1100', sizes: '(min-width: 990px) 42vw, 100vw' }}
+          {% else %}
+            {{ 'product-1' | placeholder_svg_tag: 'marketplace-trust__product-placeholder' }}
+          {% endif %}
+        </div>
+        <div class="marketplace-trust__product-content">
+          {% if section.settings.product_badge != blank %}
+            <span class="marketplace-trust__product-badge">{{ section.settings.product_badge | escape }}</span>
+          {% endif %}
+          <h3>
+            {% if featured_product != blank %}
+              {{ featured_product.title | escape }}
+            {% else %}
+              {{ section.settings.product_fallback_title | escape }}
+            {% endif %}
+          </h3>
+          <p class="marketplace-trust__product-price">
+            {% if featured_product != blank %}
+              {{ featured_product.price | money }}
+            {% else %}
+              {{ section.settings.product_fallback_price | escape }}
+            {% endif %}
+          </p>
+          <div class="marketplace-trust__product-description rte">
+            {% if product_description != blank %}
+              {{ product_description }}
+            {% elsif featured_product != blank and featured_product.description != blank %}
+              <p>{{ featured_product.description | strip_html | truncate: 150 }}</p>
+            {% else %}
+              <p>{{ section.settings.product_fallback_description | escape }}</p>
+            {% endif %}
+          </div>
+          <span class="marketplace-trust__product-button">{{ section.settings.product_button_label | escape }}</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .marketplace-trust--{{ section.id }} {
+    --mt-maroon: {{ section.settings.maroon_color }};
+    --mt-gold: {{ section.settings.gold_color }};
+    --mt-black: {{ section.settings.text_color }};
+    --mt-soft-gold: {{ section.settings.soft_gold_color }};
+    background: #ffffff;
+    color: var(--mt-black);
+    padding-block: clamp(44px, 6vw, 86px);
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__inner {
+    display: grid;
+    gap: clamp(34px, 5vw, 64px);
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__trust-heading-wrap,
+  .marketplace-trust--{{ section.id }} .marketplace-trust__marketplace-heading {
+    max-width: 780px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__eyebrow {
+    margin: 0 0 10px;
+    color: var(--mt-maroon);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__trust-heading,
+  .marketplace-trust--{{ section.id }} .marketplace-trust__marketplace-heading h2 {
+    margin: 0;
+    color: var(--mt-black);
+    font-size: clamp(2.4rem, 4.8vw, 4.8rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__marketplace-heading p {
+    max-width: 58ch;
+    margin: 14px auto 0;
+    color: color-mix(in srgb, var(--mt-black) 66%, transparent);
+    line-height: 1.6;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__icons {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__icon-card {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 12px;
+    min-height: 154px;
+    padding: 22px 14px;
+    border: 1px solid color-mix(in srgb, var(--mt-gold) 36%, transparent);
+    border-radius: 24px;
+    background: linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--mt-soft-gold) 52%, #ffffff) 100%);
+    box-shadow: 0 18px 44px rgba(90, 19, 44, 0.08);
+    text-align: center;
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__icon-card:hover,
+  .marketplace-trust--{{ section.id }} .marketplace-trust__logo-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--mt-gold) 72%, transparent);
+    box-shadow: 0 24px 62px rgba(90, 19, 44, 0.14);
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__icon-image,
+  .marketplace-trust--{{ section.id }} .marketplace-trust__icon-fallback {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__icon-image {
+    object-fit: contain;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__icon-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid color-mix(in srgb, var(--mt-gold) 72%, transparent);
+    background: #ffffff;
+    color: var(--mt-maroon);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__icon-card span:last-child {
+    color: var(--mt-black);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.28;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__marketplaces {
+    display: grid;
+    gap: clamp(24px, 4vw, 40px);
+    padding: clamp(24px, 4vw, 46px);
+    border-radius: 34px;
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--mt-gold) 18%, transparent), transparent 30%),
+      linear-gradient(135deg, #ffffff, color-mix(in srgb, var(--mt-soft-gold) 46%, #ffffff));
+    border: 1px solid color-mix(in srgb, var(--mt-gold) 34%, transparent);
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__logo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__logo-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 118px;
+    padding: 22px;
+    border: 1px solid color-mix(in srgb, var(--mt-gold) 38%, transparent);
+    border-radius: 24px;
+    background: #ffffff;
+    color: var(--mt-maroon);
+    font-size: clamp(1.35rem, 2.3vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    box-shadow: 0 18px 44px rgba(37, 24, 29, 0.08);
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__logo-image {
+    max-width: 170px;
+    max-height: 58px;
+    object-fit: contain;
+  }
+
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-showcase {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+    align-items: center;
+    gap: clamp(24px, 5vw, 70px);
+    padding: clamp(26px, 5vw, 58px);
+    border: 1px solid color-mix(in srgb, var(--mt-gold) 38%, transparent);
+    border-radius: 34px;
+    background: linear-gradient(135deg, #ffffff 0%, color-mix(in srgb, var(--mt-soft-gold) 42%, #ffffff) 100%);
+    box-shadow: 0 24px 70px rgba(37, 24, 29, 0.08);
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-copy h2 {
+    margin: 0;
+    color: var(--mt-black);
+    font-size: clamp(2.4rem, 4.8vw, 4.9rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-subtitle {
+    max-width: 48ch;
+    margin-top: 16px;
+    color: color-mix(in srgb, var(--mt-black) 72%, transparent);
+    line-height: 1.7;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-card {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.88fr) minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--mt-gold) 44%, transparent);
+    border-radius: 28px;
+    background: #ffffff;
+    color: var(--mt-black);
+    text-decoration: none;
+    box-shadow: 0 24px 62px rgba(90, 19, 44, 0.13);
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-card:hover {
+    transform: translateY(-6px);
+    border-color: color-mix(in srgb, var(--mt-gold) 78%, transparent);
+    box-shadow: 0 34px 82px rgba(90, 19, 44, 0.19);
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-media {
+    min-height: 330px;
+    background: color-mix(in srgb, var(--mt-soft-gold) 52%, #ffffff);
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-image,
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 330px;
+    object-fit: cover;
+    transition: transform 220ms ease;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-card:hover .marketplace-trust__product-image {
+    transform: scale(1.04);
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(22px, 4vw, 42px);
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-badge {
+    width: fit-content;
+    margin-bottom: 14px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: var(--mt-maroon);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-content h3 {
+    margin: 0;
+    color: var(--mt-black);
+    font-size: clamp(1.55rem, 2.4vw, 2.25rem);
+    line-height: 1.08;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-price {
+    margin: 12px 0;
+    color: var(--mt-maroon);
+    font-size: 1.25rem;
+    font-weight: 900;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-description {
+    color: color-mix(in srgb, var(--mt-black) 72%, transparent);
+    line-height: 1.65;
+  }
+
+  .marketplace-trust--{{ section.id }} .marketplace-trust__product-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin-top: 20px;
+    padding: 13px 24px;
+    border-radius: 999px;
+    background: var(--mt-maroon);
+    color: #ffffff;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 14px 30px rgba(90, 19, 44, 0.22);
+  }
+
+  @media screen and (max-width: 989px) {
+    .marketplace-trust--{{ section.id }} .marketplace-trust__icons {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__logo-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__product-showcase,
+    .marketplace-trust--{{ section.id }} .marketplace-trust__product-card {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .marketplace-trust--{{ section.id }} {
+      padding-block: 38px;
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__icons {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__icon-card {
+      min-height: 138px;
+      padding: 18px 10px;
+      border-radius: 18px;
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__marketplaces {
+      padding: 20px 14px;
+      border-radius: 24px;
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__logo-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__logo-card {
+      min-height: 92px;
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__product-showcase {
+      padding: 20px 14px;
+      border-radius: 24px;
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__product-media,
+    .marketplace-trust--{{ section.id }} .marketplace-trust__product-image,
+    .marketplace-trust--{{ section.id }} .marketplace-trust__product-placeholder {
+      min-height: 280px;
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__product-content {
+      padding: 22px;
+    }
+
+    .marketplace-trust--{{ section.id }} .marketplace-trust__product-button {
+      width: 100%;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Marketplace Trust",
+  "tag": "section",
+  "class": "section section-marketplace-trust",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Why customers choose us"
+    },
+    {
+      "type": "text",
+      "id": "trust_heading",
+      "label": "Trust heading",
+      "default": "Premium jewellery, trusted nationwide"
+    },
+    {
+      "type": "image_picker",
+      "id": "trust_icon_1",
+      "label": "Trust icon 1"
+    },
+    {
+      "type": "text",
+      "id": "trust_text_1",
+      "label": "Trust text 1",
+      "default": "10+ Years Legacy"
+    },
+    {
+      "type": "image_picker",
+      "id": "trust_icon_2",
+      "label": "Trust icon 2"
+    },
+    {
+      "type": "text",
+      "id": "trust_text_2",
+      "label": "Trust text 2",
+      "default": "Trusted Product"
+    },
+    {
+      "type": "image_picker",
+      "id": "trust_icon_3",
+      "label": "Trust icon 3"
+    },
+    {
+      "type": "text",
+      "id": "trust_text_3",
+      "label": "Trust text 3",
+      "default": "Hassle Free Replacement"
+    },
+    {
+      "type": "image_picker",
+      "id": "trust_icon_4",
+      "label": "Trust icon 4"
+    },
+    {
+      "type": "text",
+      "id": "trust_text_4",
+      "label": "Trust text 4",
+      "default": "Assured Warranty"
+    },
+    {
+      "type": "image_picker",
+      "id": "trust_icon_5",
+      "label": "Trust icon 5"
+    },
+    {
+      "type": "text",
+      "id": "trust_text_5",
+      "label": "Trust text 5",
+      "default": "Fast & Free Delivery"
+    },
+    {
+      "type": "image_picker",
+      "id": "trust_icon_6",
+      "label": "Trust icon 6"
+    },
+    {
+      "type": "text",
+      "id": "trust_text_6",
+      "label": "Trust text 6",
+      "default": "Quick Support"
+    },
+    {
+      "type": "text",
+      "id": "marketplace_heading",
+      "label": "Marketplace heading",
+      "default": "LEADING BRAND ON MARKETPLACES"
+    },
+    {
+      "type": "text",
+      "id": "marketplace_subtitle",
+      "label": "Marketplace subtitle",
+      "default": "Loved across India's favourite fashion and shopping destinations."
+    },
+    {
+      "type": "image_picker",
+      "id": "marketplace_logo_1",
+      "label": "Myntra logo"
+    },
+    {
+      "type": "text",
+      "id": "marketplace_name_1",
+      "label": "Marketplace name 1",
+      "default": "Myntra"
+    },
+    {
+      "type": "url",
+      "id": "marketplace_link_1",
+      "label": "Myntra link"
+    },
+    {
+      "type": "image_picker",
+      "id": "marketplace_logo_2",
+      "label": "Flipkart logo"
+    },
+    {
+      "type": "text",
+      "id": "marketplace_name_2",
+      "label": "Marketplace name 2",
+      "default": "Flipkart"
+    },
+    {
+      "type": "url",
+      "id": "marketplace_link_2",
+      "label": "Flipkart link"
+    },
+    {
+      "type": "image_picker",
+      "id": "marketplace_logo_3",
+      "label": "Amazon logo"
+    },
+    {
+      "type": "text",
+      "id": "marketplace_name_3",
+      "label": "Marketplace name 3",
+      "default": "Amazon"
+    },
+    {
+      "type": "url",
+      "id": "marketplace_link_3",
+      "label": "Amazon link"
+    },
+    {
+      "type": "image_picker",
+      "id": "marketplace_logo_4",
+      "label": "AJIO logo"
+    },
+    {
+      "type": "text",
+      "id": "marketplace_name_4",
+      "label": "Marketplace name 4",
+      "default": "AJIO"
+    },
+    {
+      "type": "url",
+      "id": "marketplace_link_4",
+      "label": "AJIO link"
+    },
+
+    {
+      "type": "header",
+      "content": "Product showcase"
+    },
+    {
+      "type": "product",
+      "id": "featured_product",
+      "label": "Featured product"
+    },
+    {
+      "type": "text",
+      "id": "product_eyebrow",
+      "label": "Product eyebrow",
+      "default": "Featured jewellery product"
+    },
+    {
+      "type": "text",
+      "id": "product_heading",
+      "label": "Product heading",
+      "default": "Premium jewellery pick"
+    },
+    {
+      "type": "richtext",
+      "id": "product_subtitle",
+      "label": "Product subtitle",
+      "default": "<p>Highlight a signature piece beneath your marketplace trust row with premium Priyaasi-inspired styling.</p>"
+    },
+    {
+      "type": "text",
+      "id": "product_badge",
+      "label": "Product badge",
+      "default": "Bestseller"
+    },
+    {
+      "type": "text",
+      "id": "product_fallback_title",
+      "label": "Fallback product title",
+      "default": "Maroon Kundan Statement Necklace"
+    },
+    {
+      "type": "text",
+      "id": "product_fallback_price",
+      "label": "Fallback product price",
+      "default": "$49.00"
+    },
+    {
+      "type": "richtext",
+      "id": "product_description",
+      "label": "Product description"
+    },
+    {
+      "type": "text",
+      "id": "product_fallback_description",
+      "label": "Fallback product description",
+      "default": "A regal jewellery pick with maroon accents, light-gold detailing, and festive sparkle for every celebration."
+    },
+    {
+      "type": "text",
+      "id": "product_button_label",
+      "label": "Product button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "product_button_link",
+      "label": "Fallback product button link"
+    },
+    {
+      "type": "color",
+      "id": "maroon_color",
+      "label": "Maroon",
+      "default": "#5a132c"
+    },
+    {
+      "type": "color",
+      "id": "gold_color",
+      "label": "Light gold",
+      "default": "#d6aa4c"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Black text",
+      "default": "#1c1618"
+    },
+    {
+      "type": "color",
+      "id": "soft_gold_color",
+      "label": "Soft gold background",
+      "default": "#fff6e3"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Marketplace Trust"
+    }
+  ]
+}
+{% endschema %}
