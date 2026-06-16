@@ -19,8 +19,8 @@ if (process.argv.includes('--help')) {
   process.exit(0);
 }
 
-const adjectives = ['Aurora', 'Summit', 'Lunar', 'Ember', 'Harbor', 'Willow', 'Cobalt', 'Saffron'];
-const nouns = ['Desk Lamp', 'Canvas Tote', 'Ceramic Mug', 'Travel Journal', 'Throw Pillow', 'Wall Clock', 'Planter', 'Notebook'];
+const adjectives = ['Kundan', 'Polki', 'Temple', 'Pearl', 'Meenakari', 'Antique Gold', 'Ruby', 'Emerald'];
+const nouns = ['Statement Necklace', 'Bangle Set', 'Charm Bracelet', 'Drop Earrings', 'Hair Accessory', 'Cocktail Ring', 'Layered Anklet', 'Mangalsutra'];
 
 function normalizeShopDomain(value) {
   return value
@@ -57,9 +57,9 @@ function buildProduct(index) {
 
   return {
     title,
-    descriptionHtml: `<p>Random MCP-generated product ${index + 1} of ${count}. Created for store setup testing.</p>`,
-    vendor: 'Digital Impression MCP',
-    productType: 'Random MCP Product',
+    descriptionHtml: `<p>Premium jewellery product ${index + 1} of ${count}, created for store setup testing with a maroon, gold, and festive styling direction.</p>`,
+    vendor: 'Digital Impression Jewellery',
+    productType: 'Jewellery',
     status,
   };
 }
