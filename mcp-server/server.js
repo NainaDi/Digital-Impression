@@ -6,7 +6,9 @@ const shopifyShop = normalizeShopDomain(process.env.SHOPIFY_SHOP || '');
 const shopifyAccessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 const shopifyApiVersion = process.env.SHOPIFY_ADMIN_API_VERSION || '2025-10';
 const timeoutMs = Number.parseInt(process.env.MCP_HTTP_TIMEOUT_MS || '15000', 10);
-const mode = baseUrl && sharedSecret ? 'middleware' : shopifyShop && shopifyAccessToken ? 'direct' : '';
+const canUseMiddleware = Boolean(baseUrl && sharedSecret);
+const canUseDirect = Boolean(shopifyShop && shopifyAccessToken);
+const mode = canUseMiddleware ? 'middleware' : canUseDirect ? 'direct' : '';
 
 function normalizeShopDomain(value) {
   return value
@@ -32,6 +34,8 @@ const { z } = await import('zod');
 const { readFile } = await import('node:fs/promises');
 const { dirname, resolve } = await import('node:path');
 const { fileURLToPath } = await import('node:url');
+const { execFile } = await import('node:child_process');
+const { promisify } = await import('node:util');
 
 const server = new McpServer({
   name: 'shopify-middleware-mcp',
@@ -41,6 +45,7 @@ const server = new McpServer({
 const first = z.number().int().min(1).max(50).default(10);
 const query = z.string().max(250).optional().default('');
 const gid = z.string().startsWith('gid://shopify/');
+const execFileAsync = promisify(execFile);
 
 async function callMiddleware(endpoint, payload = {}) {
   const controller = new AbortController();
@@ -97,44 +102,106 @@ async function loadStoredOperation(operationName) {
   return query;
 }
 
-async function callShopify(operationName, variables = {}) {
+async function postJson(url, headers, payload) {
+  const requestTimeoutMs = Number.isFinite(timeoutMs) ? timeoutMs : 15000;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), Number.isFinite(timeoutMs) ? timeoutMs : 15000);
+  const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
 
   try {
-    const query = await loadStoredOperation(operationName);
-    const response = await fetch(shopifyGraphqlUrl(), {
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': shopifyAccessToken,
-      },
-      body: JSON.stringify({ query, variables }),
+      headers,
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
 
-    const text = await response.text();
-    let body;
-    try {
-      body = text ? JSON.parse(text) : null;
-    } catch {
-      body = { errors: [{ message: 'Shopify returned a non-JSON response.', raw: text.slice(0, 500) }] };
+    return {
+      ok: response.ok,
+      status: response.status,
+      text: await response.text(),
+    };
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw error;
     }
 
-    if (!response.ok) {
-      const message = body?.errors?.[0]?.message || `Shopify HTTP ${response.status}`;
-      throw new Error(message);
-    }
-
-    if (body?.errors?.length > 0) {
-      throw new Error(body.errors.map((error) => error.message).join('; '));
-    }
-
-    return body;
+    return postJsonWithCurl(url, headers, payload, requestTimeoutMs);
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function postJsonWithCurl(url, headers, payload, requestTimeoutMs) {
+  const args = [
+    '--silent',
+    '--show-error',
+    '--connect-timeout',
+    String(Math.max(1, Math.ceil(requestTimeoutMs / 1000))),
+    '--max-time',
+    String(Math.max(1, Math.ceil(requestTimeoutMs / 1000))),
+    '--write-out',
+    '\n%{http_code}',
+    '--request',
+    'POST',
+    url,
+  ];
+
+  for (const [name, value] of Object.entries(headers)) {
+    args.push('--header', `${name}: ${value}`);
+  }
+
+  args.push('--data', JSON.stringify(payload));
+
+  let stdout;
+  try {
+    ({ stdout } = await execFileAsync('curl', args, {
+      maxBuffer: 1024 * 1024 * 10,
+      timeout: requestTimeoutMs + 1000,
+    }));
+  } catch (error) {
+    throw new Error(error?.stderr || 'curl request failed.');
+  }
+
+  const separator = stdout.lastIndexOf('\n');
+  const text = separator === -1 ? stdout : stdout.slice(0, separator);
+  const status = Number.parseInt(separator === -1 ? '0' : stdout.slice(separator + 1), 10);
+
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text,
+  };
+}
+
+async function callShopify(operationName, variables = {}) {
+  const query = await loadStoredOperation(operationName);
+  const response = await postJson(
+    shopifyGraphqlUrl(),
+    {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': shopifyAccessToken,
+    },
+    { query, variables },
+  );
+
+  let body;
+  try {
+    body = response.text ? JSON.parse(response.text) : null;
+  } catch {
+    body = { errors: [{ message: 'Shopify returned a non-JSON response.', raw: response.text.slice(0, 500) }] };
+  }
+
+  if (!response.ok) {
+    const message = body?.errors?.[0]?.message || `Shopify HTTP ${response.status}`;
+    throw new Error(message);
+  }
+
+  if (body?.errors?.length > 0) {
+    throw new Error(body.errors.map((error) => error.message).join('; '));
+  }
+
+  return body;
 }
 
 function asProductUpdateVariables(args) {
@@ -163,10 +230,17 @@ function toolResponse(payload) {
 
 function registerTool(name, description, schema, endpoint, operationName, mapVariables = (args) => args) {
   server.tool(name, description, schema, async (args) => {
-    const result = mode === 'middleware'
-      ? await callMiddleware(endpoint, args)
-      : await callShopify(operationName, mapVariables(args));
-    return toolResponse(result);
+    if (mode === 'middleware') {
+      try {
+        return toolResponse(await callMiddleware(endpoint, args));
+      } catch (error) {
+        if (!canUseDirect) {
+          throw error;
+        }
+      }
+    }
+
+    return toolResponse(await callShopify(operationName, mapVariables(args)));
   });
 }
 

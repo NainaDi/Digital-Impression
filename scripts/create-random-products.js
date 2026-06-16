@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 const count = Number.parseInt(process.env.PRODUCT_COUNT || '5', 10);
 const status = process.env.PRODUCT_STATUS || 'DRAFT';
@@ -10,6 +12,7 @@ const shop = normalizeShopDomain(process.env.SHOPIFY_SHOP || '');
 const accessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 const apiVersion = process.env.SHOPIFY_ADMIN_API_VERSION || '2025-10';
 const timeoutMs = Number.parseInt(process.env.MCP_HTTP_TIMEOUT_MS || '15000', 10);
+const execFileAsync = promisify(execFile);
 
 if (process.argv.includes('--help')) {
   console.log(`Usage: SHOPIFY_SHOP=your-shop.myshopify.com SHOPIFY_ADMIN_ACCESS_TOKEN=shpat_... PRODUCT_COUNT=5 PRODUCT_STATUS=DRAFT node scripts/create-random-products.js`);
@@ -61,40 +64,109 @@ function buildProduct(index) {
   };
 }
 
-async function createProduct(query, product) {
+async function postJson(url, headers, payload) {
+  const requestTimeoutMs = Number.isFinite(timeoutMs) ? timeoutMs : 15000;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), Number.isFinite(timeoutMs) ? timeoutMs : 15000);
+  const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
 
   try {
-    const response = await fetch(`https://${shop}/admin/api/${apiVersion}/graphql.json`, {
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': accessToken,
-      },
-      body: JSON.stringify({ query, variables: { product } }),
+      headers,
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
 
-    const body = await response.json();
-    if (!response.ok) {
-      throw new Error(body?.errors?.[0]?.message || `Shopify HTTP ${response.status}`);
+    return {
+      ok: response.ok,
+      status: response.status,
+      text: await response.text(),
+    };
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw error;
     }
 
-    if (body?.errors?.length > 0) {
-      throw new Error(body.errors.map((error) => error.message).join('; '));
-    }
-
-    const userErrors = body?.data?.productCreate?.userErrors || [];
-    if (userErrors.length > 0) {
-      throw new Error(userErrors.map((error) => error.message).join('; '));
-    }
-
-    return body.data.productCreate.product;
+    return postJsonWithCurl(url, headers, payload, requestTimeoutMs);
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function postJsonWithCurl(url, headers, payload, requestTimeoutMs) {
+  const args = [
+    '--silent',
+    '--show-error',
+    '--connect-timeout',
+    String(Math.max(1, Math.ceil(requestTimeoutMs / 1000))),
+    '--max-time',
+    String(Math.max(1, Math.ceil(requestTimeoutMs / 1000))),
+    '--write-out',
+    '\n%{http_code}',
+    '--request',
+    'POST',
+    url,
+  ];
+
+  for (const [name, value] of Object.entries(headers)) {
+    args.push('--header', `${name}: ${value}`);
+  }
+
+  args.push('--data', JSON.stringify(payload));
+
+  let stdout;
+  try {
+    ({ stdout } = await execFileAsync('curl', args, {
+      maxBuffer: 1024 * 1024 * 10,
+      timeout: requestTimeoutMs + 1000,
+    }));
+  } catch (error) {
+    throw new Error(error?.stderr || 'curl request failed.');
+  }
+
+  const separator = stdout.lastIndexOf('\n');
+  const text = separator === -1 ? stdout : stdout.slice(0, separator);
+  const status = Number.parseInt(separator === -1 ? '0' : stdout.slice(separator + 1), 10);
+
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text,
+  };
+}
+
+async function createProduct(query, product) {
+  const response = await postJson(
+    `https://${shop}/admin/api/${apiVersion}/graphql.json`,
+    {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': accessToken,
+    },
+    { query, variables: { product } },
+  );
+
+  let body;
+  try {
+    body = response.text ? JSON.parse(response.text) : null;
+  } catch {
+    throw new Error('Shopify returned an invalid JSON response.');
+  }
+
+  if (!response.ok) {
+    throw new Error(body?.errors?.[0]?.message || `Shopify HTTP ${response.status}`);
+  }
+
+  if (body?.errors?.length > 0) {
+    throw new Error(body.errors.map((error) => error.message).join('; '));
+  }
+
+  const userErrors = body?.data?.productCreate?.userErrors || [];
+  if (userErrors.length > 0) {
+    throw new Error(userErrors.map((error) => error.message).join('; '));
+  }
+
+  return body.data.productCreate.product;
 }
 
 try {

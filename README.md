@@ -35,7 +35,7 @@ The logger redacts keys containing `token`, `secret`, or `authorization` before 
 
 ### Node MCP bridge / Codex Cloud
 
-The bridge supports two connection modes. If `MCP_MIDDLEWARE_BASE_URL` and `MCP_SHARED_SECRET` are present, it calls the PHP middleware. Otherwise, it can connect directly to Shopify Admin GraphQL when `SHOPIFY_SHOP` and `SHOPIFY_ADMIN_ACCESS_TOKEN` are present.
+The bridge supports two connection modes. If `MCP_MIDDLEWARE_BASE_URL` and `MCP_SHARED_SECRET` are present, it tries the PHP middleware first. When direct Shopify credentials are also present, the bridge falls back to Shopify Admin GraphQL if the middleware call fails. If middleware variables are omitted, it connects directly to Shopify Admin GraphQL when `SHOPIFY_SHOP` and `SHOPIFY_ADMIN_ACCESS_TOKEN` are present.
 
 | Variable | Description |
 | --- | --- |
