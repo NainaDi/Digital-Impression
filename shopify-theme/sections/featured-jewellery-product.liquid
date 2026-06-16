@@ -1,0 +1,424 @@
+{% liquid
+  assign featured_product = section.settings.product
+  assign rating_value = section.settings.rating | default: 5
+  assign rating_label = rating_value | append: ' out of 5 stars'
+  assign description_text = section.settings.description
+%}
+
+<section class="featured-jewellery-product featured-jewellery-product--{{ section.id }} color-{{ section.settings.color_scheme }}">
+  <div class="featured-jewellery-product__inner page-width">
+    <div class="featured-jewellery-product__intro">
+      {% if section.settings.eyebrow != blank %}
+        <p class="featured-jewellery-product__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {% endif %}
+
+      {% if section.settings.heading != blank %}
+        <h2 class="featured-jewellery-product__heading">{{ section.settings.heading | escape }}</h2>
+      {% endif %}
+    </div>
+
+    <div class="featured-jewellery-product__card">
+      <div class="featured-jewellery-product__image-wrap">
+        {% if featured_product != blank and featured_product.featured_image != blank %}
+          {{ featured_product.featured_image | image_url: width: 1200 | image_tag: class: 'featured-jewellery-product__image', loading: 'lazy', widths: '480, 720, 960, 1200', sizes: '(min-width: 990px) 46vw, 100vw' }}
+        {% else %}
+          <div class="featured-jewellery-product__placeholder">
+            {{ 'product-1' | placeholder_svg_tag: 'featured-jewellery-product__placeholder-svg' }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="featured-jewellery-product__content">
+        {% if section.settings.badge != blank %}
+          <span class="featured-jewellery-product__badge">{{ section.settings.badge | escape }}</span>
+        {% endif %}
+
+        <h3 class="featured-jewellery-product__title">
+          {% if featured_product != blank %}
+            {{ featured_product.title | escape }}
+          {% else %}
+            {{ section.settings.fallback_title | escape }}
+          {% endif %}
+        </h3>
+
+        <div class="featured-jewellery-product__rating" aria-label="{{ rating_label }}">
+          <span class="featured-jewellery-product__stars" aria-hidden="true">
+            {% for star in (1..5) %}
+              <span class="featured-jewellery-product__star{% if star <= rating_value %} is-filled{% endif %}">★</span>
+            {% endfor %}
+          </span>
+          {% if section.settings.review_text != blank %}
+            <span class="featured-jewellery-product__review-text">{{ section.settings.review_text | escape }}</span>
+          {% endif %}
+        </div>
+
+        <p class="featured-jewellery-product__price">
+          {% if featured_product != blank %}
+            {{ featured_product.price | money }}
+            {% if featured_product.compare_at_price > featured_product.price %}
+              <span>{{ featured_product.compare_at_price | money }}</span>
+            {% endif %}
+          {% else %}
+            {{ section.settings.fallback_price | escape }}
+          {% endif %}
+        </p>
+
+        <div class="featured-jewellery-product__description rte">
+          {% if description_text != blank %}
+            {{ description_text }}
+          {% elsif featured_product != blank and featured_product.description != blank %}
+            <p>{{ featured_product.description | strip_html | truncate: 150 }}</p>
+          {% else %}
+            <p>{{ section.settings.fallback_description | escape }}</p>
+          {% endif %}
+        </div>
+
+        <a class="featured-jewellery-product__button" href="{% if featured_product != blank %}{{ featured_product.url }}{% else %}{{ section.settings.button_link | default: '#' }}{% endif %}">
+          {{ section.settings.button_label | escape }}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .featured-jewellery-product--{{ section.id }} {
+    --fjp-maroon: {{ section.settings.maroon_color }};
+    --fjp-gold: {{ section.settings.gold_color }};
+    --fjp-text: {{ section.settings.text_color }};
+    --fjp-soft: {{ section.settings.soft_background }};
+    background: #ffffff;
+    color: var(--fjp-text);
+    padding-block: clamp(48px, 7vw, 96px);
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__inner {
+    display: grid;
+    gap: clamp(28px, 4vw, 52px);
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__intro {
+    max-width: 760px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__eyebrow {
+    margin: 0 0 12px;
+    color: var(--fjp-maroon);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__heading {
+    margin: 0;
+    color: var(--fjp-text);
+    font-size: clamp(3rem, 5.4vw, 5.8rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__card {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.88fr);
+    gap: clamp(24px, 4vw, 58px);
+    align-items: center;
+    padding: clamp(18px, 3vw, 34px);
+    border: 1px solid color-mix(in srgb, var(--fjp-gold) 46%, transparent);
+    border-radius: 34px;
+    background:
+      radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--fjp-gold) 14%, transparent), transparent 28%),
+      linear-gradient(135deg, #ffffff 0%, var(--fjp-soft) 100%);
+    box-shadow: 0 28px 80px rgba(90, 19, 44, 0.12);
+    overflow: hidden;
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__card:hover {
+    transform: translateY(-6px);
+    border-color: color-mix(in srgb, var(--fjp-gold) 76%, transparent);
+    box-shadow: 0 34px 98px rgba(90, 19, 44, 0.18);
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__image-wrap {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 28px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__image,
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__placeholder,
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__placeholder-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__image {
+    display: block;
+    object-fit: cover;
+    transition: transform 260ms ease;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__card:hover .featured-jewellery-product__image {
+    transform: scale(1.035);
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--fjp-gold) 10%, #ffffff);
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__content {
+    padding: clamp(10px, 2vw, 24px);
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__badge {
+    display: inline-flex;
+    margin-bottom: 16px;
+    padding: 8px 14px;
+    border: 1px solid color-mix(in srgb, var(--fjp-gold) 58%, transparent);
+    border-radius: 999px;
+    color: var(--fjp-maroon);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: #fff;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__title {
+    margin: 0;
+    color: var(--fjp-maroon);
+    font-size: clamp(2.4rem, 4vw, 4.4rem);
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__rating {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 18px;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__stars {
+    color: color-mix(in srgb, var(--fjp-gold) 24%, #d8d2ca);
+    letter-spacing: 0.12em;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__star.is-filled {
+    color: var(--fjp-gold);
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__review-text {
+    color: color-mix(in srgb, var(--fjp-text) 68%, transparent);
+    font-size: 0.95rem;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__price {
+    margin: 20px 0 0;
+    color: var(--fjp-text);
+    font-size: clamp(1.8rem, 2.2vw, 2.4rem);
+    font-weight: 800;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__price span {
+    margin-left: 10px;
+    color: color-mix(in srgb, var(--fjp-text) 44%, transparent);
+    font-size: 0.72em;
+    font-weight: 500;
+    text-decoration: line-through;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__description {
+    margin-top: 18px;
+    color: color-mix(in srgb, var(--fjp-text) 72%, transparent);
+    font-size: 1.08rem;
+    line-height: 1.65;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__description p {
+    margin: 0;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    margin-top: 28px;
+    padding: 0 32px;
+    border: 1px solid var(--fjp-maroon);
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--fjp-maroon), #8f2448);
+    color: #ffffff;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    box-shadow: 0 16px 34px rgba(90, 19, 44, 0.24);
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  }
+
+  .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__button:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #8f2448, var(--fjp-maroon));
+    box-shadow: 0 20px 44px rgba(90, 19, 44, 0.3);
+  }
+
+  @media screen and (max-width: 899px) {
+    .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__card {
+      grid-template-columns: 1fr;
+      border-radius: 26px;
+    }
+
+    .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__content {
+      padding: 4px 4px 10px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .featured-jewellery-product--{{ section.id }} {
+      padding-block: 42px;
+    }
+
+    .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__heading {
+      font-size: clamp(2.65rem, 13vw, 4rem);
+    }
+
+    .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__card {
+      padding: 14px;
+      gap: 22px;
+    }
+
+    .featured-jewellery-product--{{ section.id }} .featured-jewellery-product__button {
+      width: 100%;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Featured Jewellery",
+  "tag": "section",
+  "class": "section section-featured-jewellery-product",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Priyaasi favourite"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured Jewellery Product"
+    },
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Badge",
+      "default": "Bestseller"
+    },
+    {
+      "type": "text",
+      "id": "fallback_title",
+      "label": "Fallback product title",
+      "default": "Maroon Kundan Statement Necklace"
+    },
+    {
+      "type": "text",
+      "id": "fallback_price",
+      "label": "Fallback price",
+      "default": "₹1,499"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Custom short description",
+      "default": "<p>A regal jewellery pick with maroon accents, antique-gold detailing, and festive sparkle for every celebration.</p>"
+    },
+    {
+      "type": "text",
+      "id": "fallback_description",
+      "label": "Fallback description",
+      "default": "A regal jewellery pick with maroon accents, antique-gold detailing, and festive sparkle for every celebration."
+    },
+    {
+      "type": "range",
+      "id": "rating",
+      "label": "Rating",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "review_text",
+      "label": "Review text",
+      "default": "Loved by 1,200+ customers"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Fallback button link"
+    },
+    {
+      "type": "color",
+      "id": "maroon_color",
+      "label": "Maroon accent",
+      "default": "#5a132c"
+    },
+    {
+      "type": "color",
+      "id": "gold_color",
+      "label": "Gold accent",
+      "default": "#c99a3b"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#25181d"
+    },
+    {
+      "type": "color",
+      "id": "soft_background",
+      "label": "Soft card background",
+      "default": "#fff8ee"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Jewellery"
+    }
+  ]
+}
+{% endschema %}
