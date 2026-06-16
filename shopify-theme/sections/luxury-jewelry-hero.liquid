@@ -1,0 +1,322 @@
+{% liquid
+  assign hero_image = section.settings.hero_image
+  assign eyebrow = section.settings.eyebrow | escape
+  assign heading = section.settings.heading | escape
+  assign subtitle = section.settings.subtitle
+  assign button_label = section.settings.button_label | escape
+  assign button_link = section.settings.button_link
+%}
+
+<section class="luxury-jewelry-hero luxury-jewelry-hero--{{ section.id }} color-{{ section.settings.color_scheme }}">
+  <div class="luxury-jewelry-hero__media" aria-hidden="true">
+    {% if hero_image != blank %}
+      {{ hero_image | image_url: width: 2200 | image_tag: class: 'luxury-jewelry-hero__image', loading: 'lazy', widths: '750, 1100, 1500, 1800, 2200', sizes: '100vw' }}
+    {% else %}
+      <div class="luxury-jewelry-hero__placeholder">
+        {{ 'collection-1' | placeholder_svg_tag: 'luxury-jewelry-hero__placeholder-svg' }}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="luxury-jewelry-hero__overlay"></div>
+
+  <div class="luxury-jewelry-hero__content page-width">
+    <div class="luxury-jewelry-hero__panel">
+      {% if eyebrow != blank %}
+        <p class="luxury-jewelry-hero__eyebrow">{{ eyebrow }}</p>
+      {% endif %}
+
+      {% if heading != blank %}
+        <h1 class="luxury-jewelry-hero__heading">{{ heading }}</h1>
+      {% endif %}
+
+      {% if subtitle != blank %}
+        <div class="luxury-jewelry-hero__subtitle rte">{{ subtitle }}</div>
+      {% endif %}
+
+      {% if button_label != blank %}
+        <a class="luxury-jewelry-hero__button" href="{{ button_link | default: '#' }}">
+          {{ button_label }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .luxury-jewelry-hero--{{ section.id }} {
+    --ljh-cream: {{ section.settings.background_color }};
+    --ljh-gold: {{ section.settings.accent_color }};
+    --ljh-ink: {{ section.settings.text_color }};
+    --ljh-overlay: {{ section.settings.overlay_color }};
+    position: relative;
+    min-height: {{ section.settings.desktop_height }}px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--ljh-cream) 0%, #fffaf0 52%, #f3e2b8 100%);
+    isolation: isolate;
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__media,
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__overlay {
+    position: absolute;
+    inset: 0;
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__image,
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__placeholder,
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__placeholder-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__image {
+    display: block;
+    object-fit: cover;
+    object-position: {{ section.settings.image_position }};
+    filter: saturate(0.94) contrast(1.02);
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.24;
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__overlay {
+    z-index: 1;
+    background:
+      radial-gradient(circle at 18% 26%, rgba(255, 255, 255, 0.72), transparent 30%),
+      linear-gradient(90deg, color-mix(in srgb, var(--ljh-cream) 94%, transparent) 0%, color-mix(in srgb, var(--ljh-cream) 76%, transparent) 42%, color-mix(in srgb, var(--ljh-overlay) {{ section.settings.overlay_opacity }}%, transparent) 100%);
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__content {
+    position: relative;
+    z-index: 2;
+    min-height: {{ section.settings.desktop_height }}px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: clamp(48px, 7vw, 104px);
+    padding-bottom: clamp(48px, 7vw, 104px);
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__panel {
+    width: min(100%, 670px);
+    padding: clamp(28px, 5vw, 58px);
+    border: 1px solid color-mix(in srgb, var(--ljh-gold) 46%, transparent);
+    border-radius: 30px;
+    background: color-mix(in srgb, var(--ljh-cream) 78%, transparent);
+    box-shadow: 0 28px 80px rgba(88, 61, 20, 0.16);
+    backdrop-filter: blur(10px);
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__eyebrow {
+    margin: 0 0 14px;
+    color: var(--ljh-gold);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__heading {
+    max-width: 12ch;
+    margin: 0;
+    color: var(--ljh-ink);
+    font-size: clamp(3.2rem, 8vw, 7.6rem);
+    line-height: 0.92;
+    letter-spacing: -0.055em;
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__subtitle {
+    max-width: 52ch;
+    margin-top: 22px;
+    color: color-mix(in srgb, var(--ljh-ink) 78%, transparent);
+    font-size: clamp(1.55rem, 2.1vw, 2.05rem);
+    line-height: 1.55;
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__subtitle p {
+    margin: 0;
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    margin-top: 32px;
+    padding: 0 34px;
+    border: 1px solid var(--ljh-gold);
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--ljh-gold), #f4d989 46%, #aa7b24);
+    color: #2b1b08;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    box-shadow: 0 16px 34px rgba(145, 100, 28, 0.28);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 42px rgba(145, 100, 28, 0.34);
+  }
+
+  @media screen and (max-width: 749px) {
+    .luxury-jewelry-hero--{{ section.id }} {
+      min-height: {{ section.settings.mobile_height }}px;
+    }
+
+    .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__content {
+      min-height: {{ section.settings.mobile_height }}px;
+      align-items: flex-end;
+      padding-top: 36px;
+      padding-bottom: 36px;
+    }
+
+    .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__panel {
+      padding: 26px 22px;
+      border-radius: 22px;
+    }
+
+    .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__heading {
+      max-width: 10ch;
+      font-size: clamp(3rem, 16vw, 4.8rem);
+    }
+
+    .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__subtitle {
+      margin-top: 16px;
+      font-size: 1.45rem;
+    }
+
+    .luxury-jewelry-hero--{{ section.id }} .luxury-jewelry-hero__button {
+      width: 100%;
+      margin-top: 24px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Luxury jewelry hero",
+  "tag": "section",
+  "class": "section section-luxury-jewelry-hero",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image focal point",
+      "default": "center center",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "center top", "label": "Top" },
+        { "value": "center bottom", "label": "Bottom" },
+        { "value": "left center", "label": "Left" },
+        { "value": "right center", "label": "Right" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Fine jewelry atelier"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Quiet luxury, crafted in gold"
+    },
+    {
+      "type": "richtext",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "<p>Discover luminous essentials and heirloom-inspired pieces designed to elevate every moment.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop the collection"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Cream background",
+      "default": "#f7efdf"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Gold accent",
+      "default": "#c99a3b"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#2b2118"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Image overlay color",
+      "default": "#2b2118"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Image overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "label": "Desktop height",
+      "min": 520,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 720
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "label": "Mobile height",
+      "min": 520,
+      "max": 760,
+      "step": 20,
+      "unit": "px",
+      "default": 640
+    }
+  ],
+  "presets": [
+    {
+      "name": "Luxury jewelry hero"
+    }
+  ]
+}
+{% endschema %}
