@@ -301,10 +301,32 @@
         "desktop_height": 720,
         "mobile_height": 640
       }
+    },
+    "featured_jewellery_product_codex": {
+      "type": "featured-jewellery-product",
+      "name": "Featured Jewellery Product",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Priyaasi favourite",
+        "heading": "Featured Jewellery Product",
+        "badge": "Bestseller",
+        "fallback_title": "Maroon Kundan Statement Necklace",
+        "fallback_price": "\u20b91,499",
+        "description": "<p>A regal jewellery pick with maroon accents, antique-gold detailing, and festive sparkle for every celebration.</p>",
+        "fallback_description": "A regal jewellery pick with maroon accents, antique-gold detailing, and festive sparkle for every celebration.",
+        "rating": 5,
+        "review_text": "Loved by 1,200+ customers",
+        "button_label": "Shop Now",
+        "maroon_color": "#5a132c",
+        "gold_color": "#c99a3b",
+        "text_color": "#25181d",
+        "soft_background": "#fff8ee"
+      }
     }
   },
   "order": [
     "luxury_jewelry_hero_codex",
+    "featured_jewellery_product_codex",
     "hero_jVaWmY",
     "product_list_fa6P9H"
   ]
