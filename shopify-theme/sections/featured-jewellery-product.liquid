@@ -3,6 +3,7 @@
   assign rating_value = section.settings.rating | default: 5
   assign rating_label = rating_value | append: ' out of 5 stars'
   assign description_text = section.settings.description
+  assign usd_exchange_rate = section.settings.usd_exchange_rate | default: 83
 %}
 
 <section class="featured-jewellery-product featured-jewellery-product--{{ section.id }} color-{{ section.settings.color_scheme }}">
@@ -54,9 +55,11 @@
 
         <p class="featured-jewellery-product__price">
           {% if featured_product != blank %}
-            {{ featured_product.price | money }}
+            {% assign featured_price_usd_cents = featured_product.price | divided_by: usd_exchange_rate | round %}
+            ${{ featured_price_usd_cents | money_without_currency }}
             {% if featured_product.compare_at_price > featured_product.price %}
-              <span>{{ featured_product.compare_at_price | money }}</span>
+              {% assign compare_price_usd_cents = featured_product.compare_at_price | divided_by: usd_exchange_rate | round %}
+              <span>${{ compare_price_usd_cents | money_without_currency }}</span>
             {% endif %}
           {% else %}
             {{ section.settings.fallback_price | escape }}
@@ -349,8 +352,15 @@
     {
       "type": "text",
       "id": "fallback_price",
-      "label": "Fallback price",
+      "label": "Fallback USD price",
       "default": "$49.00"
+    },
+    {
+      "type": "number",
+      "id": "usd_exchange_rate",
+      "label": "INR to USD exchange rate",
+      "default": 83,
+      "info": "Used only in this section to display selected product prices as dollars. Cart, checkout, and product pages are not changed."
     },
     {
       "type": "richtext",

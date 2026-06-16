@@ -1,6 +1,7 @@
 {% liquid
   assign featured_product = section.settings.featured_product
   assign product_description = section.settings.product_description
+  assign usd_exchange_rate = section.settings.usd_exchange_rate | default: 83
 %}
 
 <section class="marketplace-trust marketplace-trust--{{ section.id }} color-{{ section.settings.color_scheme }}">
@@ -145,7 +146,8 @@
           </h3>
           <p class="marketplace-trust__product-price">
             {% if featured_product != blank %}
-              {{ featured_product.price | money }}
+              {% assign product_price_usd_cents = featured_product.price | divided_by: usd_exchange_rate | round %}
+              ${{ product_price_usd_cents | money_without_currency }}
             {% else %}
               {{ section.settings.product_fallback_price | escape }}
             {% endif %}
@@ -709,8 +711,15 @@
     {
       "type": "text",
       "id": "product_fallback_price",
-      "label": "Fallback product price",
+      "label": "Fallback product USD price",
       "default": "$49.00"
+    },
+    {
+      "type": "number",
+      "id": "usd_exchange_rate",
+      "label": "INR to USD exchange rate",
+      "default": 83,
+      "info": "Used only in this section to display selected product prices as dollars. Cart, checkout, and product pages are not changed."
     },
     {
       "type": "richtext",
