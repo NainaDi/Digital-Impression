@@ -304,7 +304,7 @@
     },
     "featured_jewellery_product_codex": {
       "type": "featured-jewellery-product",
-      "name": "Featured Jewellery Product",
+      "name": "Featured Jewellery",
       "settings": {
         "color_scheme": "scheme-1",
         "eyebrow": "Priyaasi favourite",
