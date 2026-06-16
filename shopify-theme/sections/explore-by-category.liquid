@@ -1,0 +1,275 @@
+<section class="explore-category explore-category--{{ section.id }} color-{{ section.settings.color_scheme }}">
+  <div class="explore-category__inner page-width">
+    {% if section.settings.heading != blank %}
+      <div class="explore-category__header">
+        {% if section.settings.eyebrow != blank %}
+          <p class="explore-category__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        {% endif %}
+        <h2>{{ section.settings.heading | escape }}</h2>
+      </div>
+    {% endif %}
+
+    <div class="explore-category__grid" role="list">
+      {% for block in section.blocks %}
+        <a
+          class="explore-category__item"
+          href="{{ block.settings.link | default: '#' }}"
+          role="listitem"
+          {{ block.shopify_attributes }}
+          aria-label="{{ block.settings.title | escape }}"
+        >
+          <span class="explore-category__circle">
+            {% if block.settings.image != blank %}
+              {{ block.settings.image | image_url: width: 420 | image_tag: class: 'explore-category__image', loading: 'lazy', widths: '160, 240, 320, 420', sizes: '(min-width: 990px) 12vw, 34vw' }}
+            {% else %}
+              <span class="explore-category__placeholder" aria-hidden="true">
+                {{ block.settings.title | slice: 0, 1 | upcase }}
+              </span>
+            {% endif %}
+          </span>
+          {% if block.settings.title != blank %}
+            <span class="explore-category__title">{{ block.settings.title | escape }}</span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .explore-category--{{ section.id }} {
+    --ec-maroon: {{ section.settings.maroon_color }};
+    --ec-gold: {{ section.settings.gold_color }};
+    --ec-text: {{ section.settings.text_color }};
+    --ec-soft-gold: {{ section.settings.soft_gold_color }};
+    background: #ffffff;
+    color: var(--ec-text);
+    padding-block: clamp(42px, 6vw, 82px);
+  }
+
+  .explore-category--{{ section.id }} .explore-category__inner {
+    display: grid;
+    gap: clamp(26px, 4vw, 46px);
+  }
+
+  .explore-category--{{ section.id }} .explore-category__header {
+    text-align: center;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__eyebrow {
+    margin: 0 0 10px;
+    color: var(--ec-maroon);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__header h2 {
+    margin: 0;
+    color: var(--ec-text);
+    font-size: clamp(2.35rem, 4.8vw, 4.8rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__grid {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: clamp(12px, 1.6vw, 22px);
+    align-items: start;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__item {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    min-width: 0;
+    color: var(--ec-text);
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__circle {
+    position: relative;
+    display: block;
+    width: min(100%, 142px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--ec-gold) 62%, transparent);
+    border-radius: 999px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.92), transparent 42%),
+      linear-gradient(145deg, #ffffff, var(--ec-soft-gold));
+    box-shadow: 0 16px 40px rgba(90, 19, 44, 0.08);
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__circle::after {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.76);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 220ms ease;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__placeholder {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: var(--ec-maroon);
+    font-family: serif;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 700;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__title {
+    color: var(--ec-text);
+    font-size: clamp(0.88rem, 1vw, 1rem);
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .explore-category--{{ section.id }} .explore-category__item:hover .explore-category__circle {
+    transform: translateY(-5px);
+    border-color: color-mix(in srgb, var(--ec-gold) 90%, transparent);
+    box-shadow: 0 24px 58px rgba(90, 19, 44, 0.15);
+  }
+
+  .explore-category--{{ section.id }} .explore-category__item:hover .explore-category__image {
+    transform: scale(1.06);
+  }
+
+  @media screen and (max-width: 989px) {
+    .explore-category--{{ section.id }} .explore-category__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .explore-category--{{ section.id }} {
+      padding-block: 36px;
+    }
+
+    .explore-category--{{ section.id }} .explore-category__grid {
+      grid-template-columns: repeat({{ section.settings.mobile_columns }}, minmax(0, 1fr));
+      gap: 18px 12px;
+    }
+
+    .explore-category--{{ section.id }} .explore-category__circle {
+      width: min(100%, 132px);
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Explore by Category",
+  "tag": "section",
+  "class": "section section-explore-category",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Shop jewellery styles"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "EXPLORE BY CATEGORY"
+    },
+    {
+      "type": "select",
+      "id": "mobile_columns",
+      "label": "Mobile columns",
+      "default": "2",
+      "options": [
+        { "value": "2", "label": "2 per row" },
+        { "value": "3", "label": "3 per row" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "maroon_color",
+      "label": "Maroon",
+      "default": "#5a132c"
+    },
+    {
+      "type": "color",
+      "id": "gold_color",
+      "label": "Light gold",
+      "default": "#d6aa4c"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Black text",
+      "default": "#1c1618"
+    },
+    {
+      "type": "color",
+      "id": "soft_gold_color",
+      "label": "Soft gold background",
+      "default": "#fff6e3"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Category image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Category title",
+          "default": "Necklaces"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Collection link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Explore by Category",
+      "blocks": [
+        { "type": "category", "settings": { "title": "Necklaces" } },
+        { "type": "category", "settings": { "title": "Bangles" } },
+        { "type": "category", "settings": { "title": "Bracelets" } },
+        { "type": "category", "settings": { "title": "Earrings" } },
+        { "type": "category", "settings": { "title": "Hair Accessories" } },
+        { "type": "category", "settings": { "title": "Rings" } },
+        { "type": "category", "settings": { "title": "Anklets" } },
+        { "type": "category", "settings": { "title": "Mangalsutra" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

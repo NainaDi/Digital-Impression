@@ -113,6 +113,7 @@ $routes = [
     '/api/shop/info' => [$shopController, 'info'],
     '/api/products/search' => [$productController, 'search'],
     '/api/products/get' => [$productController, 'get'],
+    '/api/products/create-basic' => [$productController, 'createBasic'],
     '/api/products/update-basic' => [$productController, 'updateBasic'],
     '/api/collections/search' => [$readOnlyController, 'collections'],
     '/api/pages/search' => [$readOnlyController, 'pages'],

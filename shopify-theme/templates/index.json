@@ -1,0 +1,144 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */{
+  "sections": {
+    "luxury_jewelry_hero_codex": {
+      "type": "luxury-jewelry-hero",
+      "name": "Luxury jewelry hero",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "image_position": "center center",
+        "eyebrow": "Fine jewelry atelier",
+        "heading": "Quiet luxury, crafted in gold",
+        "subtitle": "<p>Discover luminous essentials and heirloom-inspired pieces designed to elevate every moment.</p>",
+        "button_label": "Shop the collection",
+        "button_link": "shopify://collections/all",
+        "background_color": "#f7efdf",
+        "accent_color": "#c99a3b",
+        "text_color": "#2b2118",
+        "overlay_color": "#2b2118",
+        "overlay_opacity": 20,
+        "desktop_height": 720,
+        "mobile_height": 640
+      }
+    },
+    "marketplace_trust_codex": {
+      "type": "marketplace-trust-row",
+      "name": "Marketplace Trust",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Why customers choose us",
+        "trust_heading": "Premium jewellery, trusted nationwide",
+        "trust_text_1": "10+ Years Legacy",
+        "trust_text_2": "Trusted Product",
+        "trust_text_3": "Hassle Free Replacement",
+        "trust_text_4": "Assured Warranty",
+        "trust_text_5": "Fast & Free Delivery",
+        "trust_text_6": "Quick Support",
+        "marketplace_heading": "LEADING BRAND ON MARKETPLACES",
+        "marketplace_subtitle": "Loved across India's favourite fashion and shopping destinations.",
+        "marketplace_name_1": "Myntra",
+        "marketplace_name_2": "Flipkart",
+        "marketplace_name_3": "Amazon",
+        "marketplace_name_4": "AJIO",
+        "maroon_color": "#5a132c",
+        "gold_color": "#d6aa4c",
+        "text_color": "#1c1618",
+        "soft_gold_color": "#fff6e3",
+        "product_eyebrow": "Featured jewellery product",
+        "product_heading": "Premium jewellery pick",
+        "product_subtitle": "<p>Discover a signature piece curated for everyday elegance and festive moments.</p>",
+        "product_badge": "Bestseller",
+        "product_fallback_title": "Maroon Kundan Statement Necklace",
+        "product_fallback_price": "\u20b91,499",
+        "product_fallback_description": "A regal jewellery pick with maroon accents, light-gold detailing, and festive sparkle for every celebration.",
+        "product_button_label": "Shop Now"
+      }
+    },
+    "explore_by_category_codex": {
+      "type": "explore-by-category",
+      "name": "Explore by Category",
+      "blocks": {
+        "category_necklaces": {
+          "type": "category",
+          "settings": {
+            "title": "Necklaces"
+          }
+        },
+        "category_bangles": {
+          "type": "category",
+          "settings": {
+            "title": "Bangles"
+          }
+        },
+        "category_bracelets": {
+          "type": "category",
+          "settings": {
+            "title": "Bracelets"
+          }
+        },
+        "category_earrings": {
+          "type": "category",
+          "settings": {
+            "title": "Earrings"
+          }
+        },
+        "category_hair_accessories": {
+          "type": "category",
+          "settings": {
+            "title": "Hair Accessories"
+          }
+        },
+        "category_rings": {
+          "type": "category",
+          "settings": {
+            "title": "Rings"
+          }
+        },
+        "category_anklets": {
+          "type": "category",
+          "settings": {
+            "title": "Anklets"
+          }
+        },
+        "category_mangalsutra": {
+          "type": "category",
+          "settings": {
+            "title": "Mangalsutra"
+          }
+        }
+      },
+      "block_order": [
+        "category_necklaces",
+        "category_bangles",
+        "category_bracelets",
+        "category_earrings",
+        "category_hair_accessories",
+        "category_rings",
+        "category_anklets",
+        "category_mangalsutra"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Shop jewellery styles",
+        "heading": "EXPLORE BY CATEGORY",
+        "mobile_columns": "2",
+        "maroon_color": "#5a132c",
+        "gold_color": "#d6aa4c",
+        "text_color": "#1c1618",
+        "soft_gold_color": "#fff6e3"
+      }
+    }
+  },
+  "order": [
+    "luxury_jewelry_hero_codex",
+    "explore_by_category_codex",
+    "marketplace_trust_codex"
+  ]
+}
