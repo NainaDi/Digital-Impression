@@ -7,7 +7,7 @@ Safe Shopify Admin GraphQL middleware and Codex MCP bridge for the Shopify store
 - PHP 8.1+ JSON middleware in `public/index.php`.
 - Stored Shopify Admin GraphQL operations in `src/Operations`.
 - Centralized validation, shared-secret auth, safe logging, and JSON errors.
-- Node.js stdio MCP bridge in `mcp-server/server.js` named `shopify-middleware-mcp`.
+- Node.js stdio MCP bridge in `mcp-server/server.js` named `shopify-middleware-mcp` with PHP middleware mode and direct Shopify Admin API mode.
 - Allowlisted tools only. Callers cannot submit arbitrary raw GraphQL.
 
 ## Security first
@@ -35,11 +35,16 @@ The logger redacts keys containing `token`, `secret`, or `authorization` before 
 
 ### Node MCP bridge / Codex Cloud
 
+The bridge supports two connection modes. If `MCP_MIDDLEWARE_BASE_URL` and `MCP_SHARED_SECRET` are present, it tries the PHP middleware first. When direct Shopify credentials are also present, the bridge falls back to Shopify Admin GraphQL if the middleware call fails. If middleware variables are omitted, it connects directly to Shopify Admin GraphQL when `SHOPIFY_SHOP` and `SHOPIFY_ADMIN_ACCESS_TOKEN` are present.
+
 | Variable | Description |
 | --- | --- |
-| `MCP_MIDDLEWARE_BASE_URL` | Public middleware base URL, for example `https://thedigitalimpressions.com/downloads/mcp`. |
-| `MCP_SHARED_SECRET` | Same shared secret configured for PHP middleware. |
-| `MCP_HTTP_TIMEOUT_MS` | Optional middleware HTTP timeout, default `15000`. |
+| `MCP_MIDDLEWARE_BASE_URL` | Public middleware base URL, for example `https://thedigitalimpressions.com/downloads/mcp`. Required for middleware mode. |
+| `MCP_SHARED_SECRET` | Same shared secret configured for PHP middleware. Required for middleware mode. |
+| `SHOPIFY_SHOP` | Shopify shop domain, for example `codex-mcp-2.myshopify.com`. Required for direct mode. |
+| `SHOPIFY_ADMIN_ACCESS_TOKEN` | Shopify Admin API access token. Required for direct mode. |
+| `SHOPIFY_ADMIN_API_VERSION` | Shopify Admin API version for direct mode, default `2025-10`. |
+| `MCP_HTTP_TIMEOUT_MS` | Optional HTTP timeout for middleware or direct mode, default `15000`. |
 
 Use `.env.example` as a template only. Do not commit `.env`.
 
@@ -52,6 +57,7 @@ All API endpoints are `POST` and return JSON.
 | `/api/shop/info` | Read shop metadata. |
 | `/api/products/search` | Search products. |
 | `/api/products/get` | Get one product by GID. |
+| `/api/products/create-basic` | Create a product with allowlisted basic fields only. |
 | `/api/products/update-basic` | Update allowlisted basic product fields only. |
 | `/api/collections/search` | Search collections. |
 | `/api/pages/search` | Search pages. |
@@ -72,6 +78,7 @@ The bridge exposes allowlisted tools that map one-to-one to the PHP middleware e
 - `shop_info`
 - `products_search`
 - `product_get`
+- `product_create_basic`
 - `product_update_basic`
 - `collections_search`
 - `pages_search`
@@ -103,6 +110,16 @@ Run the MCP bridge smoke test:
 npm --prefix mcp-server run smoke
 ```
 
+Create five random draft products directly in Shopify when Admin API credentials are available:
+
+```bash
+SHOPIFY_SHOP=codex-mcp-2.myshopify.com \
+SHOPIFY_ADMIN_ACCESS_TOKEN=replace_with_your_admin_token \
+PRODUCT_COUNT=5 \
+PRODUCT_STATUS=DRAFT \
+node scripts/create-random-products.js
+```
+
 Optionally call the deployed middleware if environment variables are available:
 
 ```bash
@@ -113,6 +130,8 @@ MCP_SHARED_SECRET=replace_with_your_shared_secret \
 
 ## Codex Cloud setup
 
+### Middleware mode
+
 1. Add these Codex Cloud environment variables:
    - `MCP_MIDDLEWARE_BASE_URL=https://thedigitalimpressions.com/downloads/mcp`
    - `MCP_SHARED_SECRET=<rotated shared secret>`
@@ -120,7 +139,19 @@ MCP_SHARED_SECRET=replace_with_your_shared_secret \
 2. Install Node dependencies in the `mcp-server` directory.
 3. Register the MCP server with name `shopify-middleware`, command `node`, and args pointing to this repository's `mcp-server/server.js`.
 
-A project-scoped example is available in `.codex/config.toml.example`:
+### Direct Shopify mode
+
+Use this when the PHP middleware is not deployed or when Codex should connect straight to Shopify. Do not commit real tokens. Store them as Codex environment variables or in an untracked local config.
+
+1. Add these Codex Cloud environment variables:
+   - `SHOPIFY_SHOP=codex-mcp-2.myshopify.com`
+   - `SHOPIFY_ADMIN_API_VERSION=2025-10`
+   - `SHOPIFY_ADMIN_ACCESS_TOKEN=<rotated Shopify Admin API token>`
+   - `MCP_HTTP_TIMEOUT_MS=15000`
+2. Install Node dependencies in the `mcp-server` directory.
+3. Register the MCP server with name `shopify-direct`, command `node`, and args pointing to this repository's `mcp-server/server.js`.
+
+Project-scoped examples for both modes are available in `.codex/config.toml.example`:
 
 ```toml
 [mcp_servers.shopify-middleware]
@@ -131,6 +162,16 @@ args = ["/absolute/path/to/mcp-shopify-middleware/mcp-server/server.js"]
 MCP_MIDDLEWARE_BASE_URL = "https://thedigitalimpressions.com/downloads/mcp"
 MCP_SHARED_SECRET = "replace_with_your_shared_secret"
 MCP_HTTP_TIMEOUT_MS = "15000"
+
+#[mcp_servers.shopify-direct]
+#command = "node"
+#args = ["/absolute/path/to/mcp-shopify-middleware/mcp-server/server.js"]
+#
+#[mcp_servers.shopify-direct.env]
+#SHOPIFY_SHOP = "codex-mcp-2.myshopify.com"
+#SHOPIFY_ADMIN_API_VERSION = "2025-10"
+#SHOPIFY_ADMIN_ACCESS_TOKEN = "replace_with_your_admin_token"
+#MCP_HTTP_TIMEOUT_MS = "15000"
 ```
 
 ## Sample cURL requests
@@ -160,6 +201,15 @@ curl --request POST 'https://thedigitalimpressions.com/downloads/mcp/api/product
   --header 'Authorization: Bearer replace_with_your_shared_secret' \
   --header 'Content-Type: application/json' \
   --data '{"id":"gid://shopify/Product/1234567890"}'
+```
+
+Create a basic draft product:
+
+```bash
+curl --request POST 'https://thedigitalimpressions.com/downloads/mcp/api/products/create-basic' \
+  --header 'Authorization: Bearer replace_with_your_shared_secret' \
+  --header 'Content-Type: application/json' \
+  --data '{"title":"Random test product","status":"DRAFT","vendor":"Digital Impression MCP","productType":"Random MCP Product"}'
 ```
 
 Update basic product fields:
@@ -208,4 +258,4 @@ Ensure `storage/logs` is writable by PHP and that direct web access to `src`, `c
 1. Rotate the Shopify Admin token and shared secret before production use.
 2. Put production PHP config on the host through environment variables or untracked `config/app.php`.
 3. Deploy only after approval.
-4. Register Codex MCP using `.codex/config.toml.example` as the template.
+4. Register Codex MCP using `.codex/config.toml.example` as the template. Use direct mode if the PHP middleware is not deployed.
